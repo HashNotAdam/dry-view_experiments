@@ -11,11 +11,17 @@ baseline_statistics = {
   measurement_cycle: 9
 }
 
+BENCHMARK_SECONDS = 10
+WARMUP_SECONDS = 1
+
 desc "Benchmark changes to Dry::View"
 task benchmark: :environment do
+  puts "Benchmarking experiment..."
   baseline = Benchmark::IPS::Report::Entry.new(*baseline_statistics.values)
-  job, experiment = suppress_stdout { run_benchmark }
-  log_results_to_stdout(job, baseline, experiment)
+  view_class = DryViewPage
+  job, experiment = suppress_stdout { run_benchmark(view_class) }
+  log_output(view_class)
+  log_results(job, baseline, experiment)
 end
 
 def suppress_stdout(&block)
@@ -26,22 +32,34 @@ ensure
   $stdout.reopen(original_stdout)
 end
 
-def run_benchmark
-  controller_view = ApplicationController.new.view_context
+def run_benchmark(view_class)
   job = nil
   report = Benchmark.ips do |x|
     job = x
-    x.time = 10
-    x.warmup = 2
-    x.report { controller_view.render(html: DryViewPage.new.call.to_s) }
+    x.time = BENCHMARK_SECONDS
+    x.warmup = WARMUP_SECONDS
+    x.report { view_class.new.call.to_s }
   end
   result = report.instance_variable_get(:@entries).first
   [job, result]
 end
 
-def log_results_to_stdout(job, baseline, experiment)
-  job.instance_variable_get(:@stdout).running "Baseline", 1
-  job.instance_variable_get(:@stdout).add_report baseline, caller(1).first
-  job.instance_variable_get(:@stdout).running "Experiment", 1
-  job.instance_variable_get(:@stdout).add_report experiment, caller(1).first
+def log_output(view_class)
+  puts <<~STR
+
+    Output:
+    -------
+    #{view_class.new.call}
+    -------
+  STR
+end
+
+def log_results(job, baseline, experiment)
+  puts "\nBenchmark result:"
+  stdout = job.instance_variable_get(:@stdout)
+  stdout.running("Baseline", 1)
+  stdout.add_report(baseline, "")
+  stdout.running("Experiment", 1)
+  stdout.add_report(experiment, "")
+  puts "\n"
 end
