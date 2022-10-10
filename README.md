@@ -10,10 +10,10 @@ represent a site built from ERB components.
 
 ## Getting started
 
-Replace PATH_TO_DRY_VIEW in the Gemfile with the path to your local copy of
+Replace `PATH_TO_DRY_VIEW` in the Gemfile with the path to your local copy of
 Dry::View.
 
-lib/benchmark.rake includes baseline setting but it is almost certain that the
-baseline will differ across devices. Run the benchmark with
+`lib/benchmark.rake` includes baseline statistics but it is almost certain that
+the baseline will differ across devices. Run the benchmark with
 `bin/rails benchmark` and then replace the values of `baseline_statistics` with
 your results.
