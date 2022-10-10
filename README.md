@@ -13,7 +13,11 @@ represent a site built from ERB components.
 Replace `PATH_TO_DRY_VIEW` in the Gemfile with the path to your local copy of
 Dry::View.
 
-`lib/benchmark.rake` includes baseline statistics but it is almost certain that
-the baseline will differ across devices. Run the benchmark with
-`bin/rails benchmark` and then replace the values of `baseline_statistics` with
-your results.
+Benchmarking is performed via a rake task:
+* `bin/rails benchmark`
+
+Before conducting an experiment, however, you will need to set the baseline
+statistics by running:
+* `bin/rails benchmark:baseline`
+
+Then place the resulting output at the top of `lib/benchmark.rake`.
